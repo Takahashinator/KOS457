@@ -39,8 +39,8 @@ exec/params: .FORCE
 	@echo creating $@
 	@mkdir -p exec
 	@echo > $@
-	@echo "mingran 2" >> $@
-	@echo "defepoch 20" >> $@
+	@echo "mingran *2*" >> $@
+	@echo "defepoch *20*" >> $@
 
 echo:
 	@echo SRC: $(SRC)

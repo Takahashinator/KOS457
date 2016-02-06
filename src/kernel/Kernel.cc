@@ -52,6 +52,60 @@ void kosMain() {
     }
     KOUT::outl();
   }
+  
+  iter = kernelFS.find("params");
+  if (iter == kernelFS.end()) {
+    KOUT::outl("params information not found!");
+  } else {
+    FileAccess f(iter->second);
+	int minGran = 0;
+	int defEpoch = 0;
+	int paramCounter = 0;
+    for (;;) {
+	  char c;
+	  char val[5];
+	  if (f.read(&c, 1) == 0) break;  
+	  while (c != '*') { // read until a * is found or until end of file
+		 if (f.read(&c, 1) == 0) break;
+	     continue;	  
+	  }
+	  
+	  if (f.read(&c, 1) == 0) break;  
+	  int length = 1;
+	  val[4] = c;
+	  for (int i = 3; i >= 0; i--){ // save chars until next *
+		f.read(&c, 1);
+		if (c == 42) break;
+		val[i] = c;
+		length++;
+	  }
+
+	  int total = 0;
+	  for (int i = 0; i < 5; i++){ //convert chars to int
+		  if (val[i] == '\0' || val[i] == '\n') 
+		  {
+		    continue;
+		  }
+		  int num = val[i] - 48;
+		  int multiple = 1;
+		  for (int j = (i - (5-length)); j > 0; j--){
+			multiple *= 10;
+		  }
+		  total += num * multiple;
+	  }
+	  if (paramCounter == 0){
+		minGran = total;
+		KOUT::out1("Minimum Granularity = ", total);
+		KOUT::outl();
+	  }else if (paramCounter == 1){
+		defEpoch = total;
+		KOUT::out1("Default Epoch = ", total);
+		KOUT::outl();
+	  }
+	  paramCounter++;	  
+    }
+    KOUT::outl();
+  }
 #if TESTING_TIMER_TEST
   StdErr.print(" timer test, 3 secs...");
   for (int i = 0; i < 3; i++) {

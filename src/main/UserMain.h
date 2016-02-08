@@ -4,8 +4,8 @@ extern int Experiments();
 extern int InitProcess();
 
 static void UserMain() {
-  LockTest();
-  TcpTest();
-  Experiments();
+  //LockTest();
+  //TcpTest();
+  //Experiments();
   InitProcess();
 }

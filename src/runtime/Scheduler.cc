@@ -90,7 +90,8 @@ void Scheduler::enqueue(Thread& t) {
   readyLock.acquire();
   readyTree->insert(*(new ThreadNode(&t)));	
   bool wake = (readyCount == 0);
-  readyCount += 1;						
+  readyCount += 1;		
+  // readyTotalPriority += (nextThread.priority + 1);  
   readyLock.release();
   Runtime::debugS("Thread ", FmtHex(&t), " queued on ", FmtHex(this));
   if (wake) Runtime::wakeUp(this);
@@ -128,7 +129,16 @@ void Scheduler::preempt(){		// IRQs disabled, lock count inflated
 	one
 ***********************************/
 bool Scheduler::switchTest(Thread* t){
-	t->vRuntime++;
+	t->vRuntime++; 	// TODO: we are currently just incrementing the vRuntime. 
+					// This needs to be calculated properly:
+					// vRuntime = (time served since last preempt / thread.priority)
+	
+	// TODO: We need to return false if the thread should not be switched, ie) the timeslice
+	// has not been completely consumed
+	// if (time served <= timeslice)
+	// 		return false;
+	// else 
+	//		return true;
 	if (t->vRuntime % 10 == 0)
 		return true;
 	return false;															//Otherwise return that the thread should not be switched
@@ -149,6 +159,10 @@ inline void Scheduler::switchThread(Scheduler* target, Args&... a) {
   if(!readyTree->empty()){
 	  nextThread = readyTree->popMinNode()->th;	
       readyCount -= 1;
+	  // TODO:
+	  // readyTotalPriority -= (nextThread.priority + 1);
+	  // minVRuntime
+	  // calculate epoch: epoch = max(defEpoch, #threads * minGran) + 1
  	  goto threadFound;
 	}
 
@@ -158,6 +172,9 @@ inline void Scheduler::switchThread(Scheduler* target, Args&... a) {
   return;                                         // return to current thread
 
 threadFound:
+  // TODO: Somwhere in this area we need to start the counter so we can check 
+  // later on if the thread has been served for the right ammount of time
+  // this is done in switchTest() 
   readyLock.release();
   resumption += 1;
   Thread* currThread = Runtime::getCurrThread();

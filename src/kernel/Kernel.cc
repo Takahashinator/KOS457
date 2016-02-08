@@ -58,8 +58,6 @@ void kosMain() {
     KOUT::outl("params information not found!");
   } else {
     FileAccess f(iter->second);
-	int minGran = 0;
-	int defEpoch = 0;
 	int paramCounter = 0;
     for (;;) {
 	  char c;
@@ -94,11 +92,11 @@ void kosMain() {
 		  total += num * multiple;
 	  }
 	  if (paramCounter == 0){
-		minGran = total;
+		Scheduler::minGran = total;
 		KOUT::out1("Minimum Granularity = ", total);
 		KOUT::outl();
 	  }else if (paramCounter == 1){
-		defEpoch = total;
+		Scheduler::defEpoch = total;
 		KOUT::out1("Default Epoch = ", total);
 		KOUT::outl();
 	  }

@@ -57,6 +57,8 @@ public:
   void suspend(BasicLock& lk);
   void suspend(BasicLock& lk1, BasicLock& lk2);
   void terminate() __noreturn;
+  static mword minGran;
+  static mword defEpoch;
 };
 
 #endif /* _Scheduler_h_ */

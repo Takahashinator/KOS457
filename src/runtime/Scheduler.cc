@@ -72,6 +72,8 @@ Scheduler::Scheduler() : readyCount(0), preemption(0), resumption(0), partner(th
 		Static functions
 ***********************************/      
 static inline void unlock() {}
+mword Scheduler::minGran;
+mword Scheduler::defEpoch;
 
 template<typename... Args>
 static inline void unlock(BasicLock &l, Args&... a) {

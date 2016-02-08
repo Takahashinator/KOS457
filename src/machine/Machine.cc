@@ -81,6 +81,7 @@ static FrameManager frameManager;
 Keyboard keyboard;
 static RTC rtc;
 static PIT pit;
+mword Machine::freq;
 
 // interrupt descriptor tables
 static const unsigned int maxIDT = 256;
@@ -339,6 +340,16 @@ void Machine::initBSP2() {
   tipiHandler = tipiReceiver;
   sendIPI(bspIndex, APIC::TestIPI);
   while (!tipiTest) CPU::Pause();
+  
+  // Caculate approximate clock frequency
+  mword time1 = CPU::readTSC();
+  Timeout::sleep(Clock::now() + 1000);
+  mword time2 = CPU::readTSC();
+  
+  Machine::freq = (time2 - time1);
+  KOUT::out1("System Frequency = ", Machine::freq, "Hz");
+  KOUT::outl();
+  
 
   // NOTE: could use broadcast and ticket lock sequencing
   // start up APs one by one (on boot stack): APs go into long mode and halt

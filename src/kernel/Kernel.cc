@@ -92,12 +92,16 @@ void kosMain() {
 		  total += num * multiple;
 	  }
 	  if (paramCounter == 0){
-		Scheduler::minGran = total;
-		KOUT::out1("Minimum Granularity = ", total);
+		Scheduler::minGran = (Machine::freq*total)/1000;
+		KOUT::out1("Minimum Granularity (ms) = ", total);
+		KOUT::outl();
+		KOUT::out1("Minimum Granularity (cycles) = ", Scheduler::minGran);
 		KOUT::outl();
 	  }else if (paramCounter == 1){
-		Scheduler::defEpoch = total;
-		KOUT::out1("Default Epoch = ", total);
+		Scheduler::defEpoch = (Machine::freq*total)/1000;
+		KOUT::out1("Default Epoch (ms) = ", total);
+		KOUT::outl();
+		KOUT::out1("Default Epoch (cycles) = ", Scheduler::defEpoch);
 		KOUT::outl();
 	  }
 	  paramCounter++;	  

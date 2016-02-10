@@ -66,6 +66,7 @@ Scheduler::Scheduler() : readyCount(0), preemption(0), resumption(0), partner(th
 	//Add the idle thread to the tree
 	readyTree->insert(*(new ThreadNode(idleThread)));
 	readyCount += 1;
+	readyTotalPriority = idleThread->priority + 1;
 }
 
 /***********************************
@@ -91,7 +92,7 @@ void Scheduler::enqueue(Thread& t) {
   readyTree->insert(*(new ThreadNode(&t)));	
   bool wake = (readyCount == 0);
   readyCount += 1;		
-  // readyTotalPriority += (nextThread.priority + 1);  
+  readyTotalPriority += (t.priority + 1);  
   readyLock.release();
   Runtime::debugS("Thread ", FmtHex(&t), " queued on ", FmtHex(this));
   if (wake) Runtime::wakeUp(this);
@@ -160,7 +161,7 @@ inline void Scheduler::switchThread(Scheduler* target, Args&... a) {
 	  nextThread = readyTree->popMinNode()->th;	
       readyCount -= 1;
 	  // TODO:
-	  // readyTotalPriority -= (nextThread.priority + 1);
+	  readyTotalPriority -= (nextThread->priority + 1);
 	  // minVRuntime
 	  // calculate epoch: epoch = max(defEpoch, #threads * minGran) + 1
  	  goto threadFound;

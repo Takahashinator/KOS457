@@ -343,7 +343,7 @@ void Machine::initBSP2() {
   
   // Caculate approximate clock frequency
   mword time1 = CPU::readTSC();
-  Timeout::sleep(Clock::now() + 1000);
+  Timeout::sleep(Clock::now() + 1);
   mword time2 = CPU::readTSC();
   
   Machine::freq = (time2 - time1);

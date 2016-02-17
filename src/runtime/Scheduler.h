@@ -37,6 +37,7 @@ class Scheduler {
   volatile mword preemption;
   volatile mword resumption;
   mword readyTotalPriority;
+  mword minVRuntime;
 
   Scheduler* partner;
 

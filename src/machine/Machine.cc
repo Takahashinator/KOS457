@@ -341,9 +341,9 @@ void Machine::initBSP2() {
   sendIPI(bspIndex, APIC::TestIPI);
   while (!tipiTest) CPU::Pause();
   
-  // Caculate approximate clock frequency
+  // Calculate approximate clock frequency
   mword time1 = CPU::readTSC();
-  Timeout::sleep(Clock::now() + 1);
+  Timeout::sleep(Clock::now() + 1000);
   mword time2 = CPU::readTSC();
   
   Machine::freq = (time2 - time1);

@@ -159,10 +159,10 @@ inline void Scheduler::switchThread(Scheduler* target, Args&... a) {
 	
   if(!readyTree->empty()){
 	  nextThread = readyTree->popMinNode()->th;	
-      readyCount -= 1;
+      	  readyCount -= 1;
 	  // TODO:
 	  readyTotalPriority -= (nextThread->priority + 1);
-	  // minVRuntime
+	  minVRuntime = nextThread->vRuntime;
 	  // calculate epoch: epoch = max(defEpoch, #threads * minGran) + 1
  	  goto threadFound;
 	}

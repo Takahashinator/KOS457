@@ -350,6 +350,9 @@ void Machine::initBSP2() {
   KOUT::out1("System Frequency = ", Machine::freq, "Hz");
   KOUT::outl();
   
+  // Save hard coded values to defEpoch and minGran
+  Scheduler::defEpoch = 21;
+  Scheduler::minGran = 5;
 
   // NOTE: could use broadcast and ticket lock sequencing
   // start up APs one by one (on boot stack): APs go into long mode and halt

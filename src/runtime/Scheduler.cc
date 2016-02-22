@@ -28,6 +28,9 @@
 	reference the thread instance
 	Created by: Adam Fazekas (Fall 2015)
 ***********************************/
+
+mword epoch;
+
 class ThreadNode{
 	friend class Scheduler;
 	Thread *th;
@@ -160,10 +163,14 @@ inline void Scheduler::switchThread(Scheduler* target, Args&... a) {
   if(!readyTree->empty()){
 	  nextThread = readyTree->popMinNode()->th;	
       	  readyCount -= 1;
-	  // TODO:
 	  readyTotalPriority -= (nextThread->priority + 1);
 	  minVRuntime = nextThread->vRuntime;
-	  // calculate epoch: epoch = max(defEpoch, #threads * minGran) + 1
+	  if (Scheduler::defEpoch >= readyCount * Scheduler::minGran){
+		epoch = Scheduler::defEpoch;
+	  }
+	  else{
+		epoch = readyCount * Scheduler::minGran;
+	  }
  	  goto threadFound;
 	}
 
@@ -186,7 +193,7 @@ threadFound:
   unlock(a...);                                   // ...thus can unlock now
   CHECK_LOCK_COUNT(1);
   Runtime::debugS("Thread switch <", (target ? 'Y' : 'S'), ">: ", FmtHex(currThread), '(', FmtHex(currThread->stackPointer), ") to ", FmtHex(nextThread), '(', FmtHex(nextThread->stackPointer), ')');
-
+  // calculate timeslice
   Runtime::MemoryContext& ctx = Runtime::getMemoryContext();
   Runtime::setCurrThread(nextThread);
   Thread* prevThread = stackSwitch(currThread, target, &currThread->stackPointer, nextThread->stackPointer);

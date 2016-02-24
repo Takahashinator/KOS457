@@ -41,13 +41,13 @@ class ThreadNode{
 	
 	public:
 		bool operator < (ThreadNode other) const {
-			return th->priority < other.th->priority;
+			return th->vRuntime < other.th->vRuntime;
 		}
 		bool operator == (ThreadNode other) const {
-			return th->priority == other.th->priority;
+			return th->vRuntime == other.th->vRuntime;
 		}
 		bool operator > (ThreadNode other) const {
-			return th->priority > other.th->priority;
+			return th->vRuntime > other.th->vRuntime;
 		}
     
 	//this is how we want to do it

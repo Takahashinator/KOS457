@@ -38,6 +38,7 @@ class Thread : public EmbeddedList<Thread>::Link {
   mword totalWaitingTime;
   mword enqueueTSC;
   mword popTSC;
+  mword suspended;
   bool affinity;            // stick with scheduler
   Scheduler* nextScheduler; // resume on same core (for now)
 

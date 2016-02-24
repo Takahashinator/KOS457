@@ -34,6 +34,8 @@ mword timeStart;
 mword timeEnd;
 mword timeServed;
 mword timeslice = 0;
+mword prevPreempt = 0;
+mword timesincelastpreempt = 0;
 
 class ThreadNode{
 	friend class Scheduler;
@@ -96,6 +98,10 @@ static inline void unlock(BasicLock &l, Args&... a) {
 void Scheduler::enqueue(Thread& t) {
   GENASSERT1(t.priority < maxPriority, t.priority);
   readyLock.acquire();
+  if (t.suspended == 1)
+	t.suspended = 0;
+  t.vRuntime += minVRuntime;
+  t.enqueueTSC = CPU::readTSC();
   readyTree->insert(*(new ThreadNode(&t)));	
   bool wake = (readyCount == 0);
   readyCount += 1;		
@@ -111,6 +117,8 @@ void Scheduler::enqueue(Thread& t) {
 ***********************************/
 void Scheduler::preempt(){		// IRQs disabled, lock count inflated
 	timeEnd = CPU::readTSC();
+	timesincelastpreempt = timeEnd - prevPreempt;
+	prevPreempt = timeEnd;
 	timeServed = timeEnd - timeStart;
 	//Get current running thread
 	Thread* currentThread = Runtime::getCurrThread();
@@ -139,7 +147,7 @@ void Scheduler::preempt(){		// IRQs disabled, lock count inflated
 	one
 ***********************************/
 bool Scheduler::switchTest(Thread* t){
-	t->vRuntime += (timeServed/(t->priority + 1));
+	t->vRuntime += (timesincelastpreempt/(t->priority + 1));
 	//t->vRuntime++; 	// TODO: we are currently just incrementing the vRuntime. 
 					// This needs to be calculated properly:
 					// vRuntime = (time served since last preempt / thread.priority)
@@ -151,7 +159,7 @@ bool Scheduler::switchTest(Thread* t){
 	// else 
 	//		return true;
 	//KOUT::out1("timeServed = ", timeServed, "timeslice = ", timeslice);
-	if (timeServed >= timeslice) 
+	if (timeServed >= timeslice && timeServed >= Scheduler::minGran) 
 		return true;
 
 	return false;
@@ -176,7 +184,9 @@ inline void Scheduler::switchThread(Scheduler* target, Args&... a) {
 	
   if(!readyTree->empty()){
 	  nextThread = readyTree->popMinNode()->th;	
-      	  readyCount -= 1;
+	  nextThread->popTSC = CPU::readTSC();
+	  nextThread->totalWaitingTime += (nextThread->popTSC - nextThread->enqueueTSC);
+      readyCount -= 1;
 	  readyTotalPriority -= (nextThread->priority + 1);
 	  minVRuntime = nextThread->vRuntime;
 	  if (Scheduler::defEpoch >= readyCount * Scheduler::minGran){
@@ -232,10 +242,12 @@ threadFound:
 ***********************************/
 void Scheduler::suspend(BasicLock& lk) {
   Runtime::FakeLock fl;
+  Runtime::getCurrThread()->suspended = 1;
   switchThread(nullptr, lk);
 }
 void Scheduler::suspend(BasicLock& lk1, BasicLock& lk2) {
   Runtime::FakeLock fl;
+  Runtime::getCurrThread()->suspended = 1;
   switchThread(nullptr, lk1, lk2);
 }
 

@@ -56,8 +56,8 @@ void kosMain() {
   iter = kernelFS.find("schedParams");
   if (iter == kernelFS.end()) {
     KOUT::outl("schedParams information not found!");
-	Scheduler::defEpoch = 21;
-	Scheduler::minGran = 5;
+	Scheduler::defEpoch = 50000000;
+	Scheduler::minGran = 5000000;
   } else {
     FileAccess f(iter->second);
 	int paramCounter = 0;

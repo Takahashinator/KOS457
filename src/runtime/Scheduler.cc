@@ -30,6 +30,10 @@
 ***********************************/
 
 mword epoch;
+mword timeStart;
+mword timeEnd;
+mword timeServed;
+mword timeslice = 0;
 
 class ThreadNode{
 	friend class Scheduler;
@@ -76,8 +80,8 @@ Scheduler::Scheduler() : readyCount(0), preemption(0), resumption(0), partner(th
 		Static functions
 ***********************************/      
 static inline void unlock() {}
-mword Scheduler::minGran;
-mword Scheduler::defEpoch;
+mword Scheduler::minGran = 5000000;
+mword Scheduler::defEpoch = 50000000;
 
 template<typename... Args>
 static inline void unlock(BasicLock &l, Args&... a) {
@@ -106,6 +110,8 @@ void Scheduler::enqueue(Thread& t) {
 	interrupt (per Scheduler)
 ***********************************/
 void Scheduler::preempt(){		// IRQs disabled, lock count inflated
+	timeEnd = CPU::readTSC();
+	timeServed = timeEnd - timeStart;
 	//Get current running thread
 	Thread* currentThread = Runtime::getCurrThread();
 
@@ -133,7 +139,8 @@ void Scheduler::preempt(){		// IRQs disabled, lock count inflated
 	one
 ***********************************/
 bool Scheduler::switchTest(Thread* t){
-	t->vRuntime++; 	// TODO: we are currently just incrementing the vRuntime. 
+	t->vRuntime += (timeServed/(t->priority + 1));
+	//t->vRuntime++; 	// TODO: we are currently just incrementing the vRuntime. 
 					// This needs to be calculated properly:
 					// vRuntime = (time served since last preempt / thread.priority)
 	
@@ -143,9 +150,16 @@ bool Scheduler::switchTest(Thread* t){
 	// 		return false;
 	// else 
 	//		return true;
-	if (t->vRuntime % 10 == 0)
+	//KOUT::out1("timeServed = ", timeServed, "timeslice = ", timeslice);
+	if (timeServed >= timeslice) 
 		return true;
-	return false;															//Otherwise return that the thread should not be switched
+
+	return false;
+
+
+/* 	if (t->vRuntime % 10 == 0)
+		return true;
+	return false; */															//Otherwise return that the thread should not be switched
 }
 
 /***********************************
@@ -193,7 +207,11 @@ threadFound:
   unlock(a...);                                   // ...thus can unlock now
   CHECK_LOCK_COUNT(1);
   Runtime::debugS("Thread switch <", (target ? 'Y' : 'S'), ">: ", FmtHex(currThread), '(', FmtHex(currThread->stackPointer), ") to ", FmtHex(nextThread), '(', FmtHex(nextThread->stackPointer), ')');
+  
   // calculate timeslice
+  timeslice = (epoch * (nextThread->priority+1)) / (readyTotalPriority + nextThread->priority + 1);
+  timeStart = CPU::readTSC();
+  
   Runtime::MemoryContext& ctx = Runtime::getMemoryContext();
   Runtime::setCurrThread(nextThread);
   Thread* prevThread = stackSwitch(currThread, target, &currThread->stackPointer, nextThread->stackPointer);

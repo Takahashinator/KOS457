@@ -270,6 +270,9 @@ void Scheduler::terminate() {
   Thread* thr = Runtime::getCurrThread();
   GENASSERT1(thr->state != Thread::Blocked, thr->state);
   thr->state = Thread::Finishing;
+  mword timeWaitingMs = float(thr->totalWaitingTime)/float(Machine::freq/1000);
+  KOUT::out1("Terminated thread has waiting time: ", timeWaitingMs,"ms ");
+  KOUT::outl();
   switchThread(nullptr);
   unreachable();
 }

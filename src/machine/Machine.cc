@@ -81,7 +81,7 @@ static FrameManager frameManager;
 Keyboard keyboard;
 static RTC rtc;
 static PIT pit;
-mword Machine::freq;
+mword Machine::freq = 2700000000;	// Default freq of 2.7GHz
 
 // interrupt descriptor tables
 static const unsigned int maxIDT = 256;

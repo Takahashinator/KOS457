@@ -35,7 +35,7 @@ class Thread : public EmbeddedList<Thread>::Link {
 
   mword priority;           // scheduling priority
   mword vRuntime;			// virtual runtime, needed to sort the tree
-  mword totalWaitingTime;
+  mword totalWaitingTime = 0;
   mword enqueueTSC;
   mword popTSC;
   mword suspended;

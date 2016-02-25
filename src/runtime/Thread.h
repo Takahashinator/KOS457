@@ -36,9 +36,9 @@ class Thread : public EmbeddedList<Thread>::Link {
   mword priority;           // scheduling priority
   mword vRuntime = 0;		// virtual runtime, needed to sort the tree
   mword totalWaitingTime = 0;
-  mword enqueueTSC;
-  mword popTSC;
-  mword suspended;
+  mword enqueueTSC;			// TSC time when the thread begins to wait
+  mword popTSC;				// TSC time when thread is no longer waiting
+  mword suspended;			// Flag to indicate the thread is sleeping
   bool affinity;            // stick with scheduler
   Scheduler* nextScheduler; // resume on same core (for now)
 

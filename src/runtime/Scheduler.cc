@@ -29,13 +29,13 @@
 	Created by: Adam Fazekas (Fall 2015)
 ***********************************/
 
-mword epoch;
-mword timeStart;
-mword timeEnd;
-mword timeServed;
-mword timeslice = 0;
-mword prevPreempt = 0;
-mword timesincelastpreempt = 0;
+mword epoch;					// time length of an Epoch
+mword timeStart;				// time a thread begins to be served
+mword timeEnd;					// time a thread stops being served
+mword timeServed;				// total time a thread has been served for
+mword timeslice = 0;			// length of time a thread should be served
+mword prevPreempt = 0;			// time AT the last preempt
+mword timesincelastpreempt = 0;	// total time since the last preempt
 
 class ThreadNode{
 	friend class Scheduler;

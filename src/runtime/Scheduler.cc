@@ -150,26 +150,11 @@ void Scheduler::preempt(){		// IRQs disabled, lock count inflated
 ***********************************/
 bool Scheduler::switchTest(Thread* t){
 	t->vRuntime += (timesincelastpreempt/(t->priority + 1));
-	//t->vRuntime++; 	// TODO: we are currently just incrementing the vRuntime. 
-					// This needs to be calculated properly:
-					// vRuntime = (time served since last preempt / thread.priority)
 	
-	// TODO: We need to return false if the thread should not be switched, ie) the timeslice
-	// has not been completely consumed
-	// if (time served <= timeslice)
-	// 		return false;
-	// else 
-	//		return true;
-	//KOUT::out1("timeServed = ", timeServed, "timeslice = ", timeslice);
 	if (timeServed >= timeslice && timeServed >= Scheduler::minGran) 
 		return true;
 
 	return false;
-
-
-/* 	if (t->vRuntime % 10 == 0)
-		return true;
-	return false; */															//Otherwise return that the thread should not be switched
 }
 
 /***********************************
@@ -206,9 +191,6 @@ inline void Scheduler::switchThread(Scheduler* target, Args&... a) {
   return;                                         // return to current thread
 
 threadFound:
-  // TODO: Somwhere in this area we need to start the counter so we can check 
-  // later on if the thread has been served for the right ammount of time
-  // this is done in switchTest() 
   readyLock.release();
   resumption += 1;
   Thread* currThread = Runtime::getCurrThread();

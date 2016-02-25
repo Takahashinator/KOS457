@@ -98,9 +98,11 @@ static inline void unlock(BasicLock &l, Args&... a) {
 void Scheduler::enqueue(Thread& t) {
   GENASSERT1(t.priority < maxPriority, t.priority);
   readyLock.acquire();
-  if (t.suspended == 1)
+  if (t.suspended == 1 || t.vRuntime == 0)
+  {
 	t.suspended = 0;
-  t.vRuntime += minVRuntime;
+	t.vRuntime += minVRuntime;
+  }
   t.enqueueTSC = CPU::readTSC();
   readyTree->insert(*(new ThreadNode(&t)));	
   bool wake = (readyCount == 0);
@@ -189,11 +191,11 @@ inline void Scheduler::switchThread(Scheduler* target, Args&... a) {
       readyCount -= 1;
 	  readyTotalPriority -= (nextThread->priority + 1);
 	  minVRuntime = nextThread->vRuntime;
-	  if (Scheduler::defEpoch >= readyCount * Scheduler::minGran){
+	  if (Scheduler::defEpoch >= (readyCount + 1) * Scheduler::minGran){
 		epoch = Scheduler::defEpoch;
 	  }
 	  else{
-		epoch = readyCount * Scheduler::minGran;
+		epoch = (readyCount + 1) * Scheduler::minGran;
 	  }
  	  goto threadFound;
 	}
@@ -242,12 +244,16 @@ threadFound:
 ***********************************/
 void Scheduler::suspend(BasicLock& lk) {
   Runtime::FakeLock fl;
-  Runtime::getCurrThread()->suspended = 1;
+  Thread* currThread = Runtime::getCurrThread();
+  currThread->suspended = 1;
+  currThread->vRuntime -= minVRuntime;
   switchThread(nullptr, lk);
 }
 void Scheduler::suspend(BasicLock& lk1, BasicLock& lk2) {
   Runtime::FakeLock fl;
-  Runtime::getCurrThread()->suspended = 1;
+  Thread* currThread = Runtime::getCurrThread();
+  currThread->suspended = 1;
+  currThread->vRuntime -= minVRuntime;
   switchThread(nullptr, lk1, lk2);
 }
 

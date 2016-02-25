@@ -93,6 +93,7 @@ void kosMain() {
 		  }
 		  total += num * multiple;
 	  }
+	  KOUT::out1("total = ", total);
 	  if (paramCounter == 0){
 		Scheduler::minGran = (Machine::freq*total)/1000;
 		KOUT::out1("Minimum Granularity (ms) = ", total);

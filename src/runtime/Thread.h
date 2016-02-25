@@ -34,7 +34,7 @@ class Thread : public EmbeddedList<Thread>::Link {
   size_t stackSize;         // size of allocated memory
 
   mword priority;           // scheduling priority
-  mword vRuntime;			// virtual runtime, needed to sort the tree
+  mword vRuntime = 0;		// virtual runtime, needed to sort the tree
   mword totalWaitingTime = 0;
   mword enqueueTSC;
   mword popTSC;

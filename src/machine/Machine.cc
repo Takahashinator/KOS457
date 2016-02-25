@@ -82,6 +82,7 @@ Keyboard keyboard;
 static RTC rtc;
 static PIT pit;
 mword Machine::freq = 2700000000;	// Default freq of 2.7GHz
+mword Machine::rtcfreq = 1024;
 
 // interrupt descriptor tables
 static const unsigned int maxIDT = 256;
@@ -347,6 +348,8 @@ void Machine::initBSP2() {
   mword time2 = CPU::readTSC();
   
   Machine::freq = (time2 - time1);
+  KOUT::out1("Adjusted RTC Freq = ", Machine::rtcfreq, "Hz");
+  KOUT::outl();
   KOUT::out1("System Frequency = ", Machine::freq, "Hz");
   KOUT::outl();
   

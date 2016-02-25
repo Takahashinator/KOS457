@@ -52,6 +52,7 @@ public:
   static void registerIrqAsync(mword irq, funcvoid1_t handler, ptr_t ctx);
   static void deregisterIrqAsync(mword irq, funcvoid1_t handler);
   static mword freq;
+  static mword rtcfreq;
 };
 
 void Breakpoint2(vaddr ia = 0) __ninline;
